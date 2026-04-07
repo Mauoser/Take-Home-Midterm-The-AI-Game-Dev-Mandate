@@ -82,13 +82,17 @@ Beyond generation, Unity's import settings are a second non-trivial decision. Un
 
 ## The Failure Case
 
+![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/05_full_pipeline_comparison.png?raw=true)
+
+*Figure 3. All three failure modes and the correct pipeline at 1:1 pixel-grid zoom. Left to right: Path A (DALL-E + bilinear downscale), Path B (PixelLab Character Creator 24×24 + manual scale), Path C (correct sprite + Unity Bilinear filter), Correct (PixelLab BitForge 16×16 + Point filter). All three failure paths produce visually identical output despite having distinct root causes and requiring different fixes.*
+
 The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong sub-tool selection, wrong import settings — that produce identical symptoms and require different fixes.
 
 **Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool.
 
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/01_failure_A.png?raw=true)
 
-*Figure 3. All three failure modes and the correct pipeline at 1:1 pixel-grid zoom. Left to right: Path A (DALL-E + bilinear downscale), Path B (PixelLab Character Creator 24×24 + manual scale), Path C (correct sprite + Unity Bilinear filter), Correct (PixelLab BitForge 16×16 + Point filter). All three failure paths produce visually identical output despite having distinct root causes and requiring different fixes.*
+*Figure 4. Failure Mode 1: general-purpose diffusion model output downscaled to 16×16 using bilinear interpolation. Left: ground truth (8 unique colors, discrete grid). Right: simulated DALL-E output after bilinear downscale (142 unique colors — a 17.8× color explosion). Every output pixel is a weighted blend of approximately 1,024 source pixels. The discrete grid was never present in the source; no import setting can reconstruct it.*
 
 **Failure Mode 2 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
