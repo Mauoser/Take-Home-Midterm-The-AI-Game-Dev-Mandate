@@ -10,7 +10,7 @@
 
 You are three weeks into building a top-down RPG in Unity. The art style is retro — 16×16 sprites, a fixed eight-color palette, the kind of constrained visual language that made *Undertale* feel handcrafted and *Celeste* feel intentional. You do not have a pixel artist on your team, so you do the reasonable thing: you open a browser tab, type a prompt into DALL-E or Gemini, and ask for a knight.
 
-![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
+![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/00_ground_truth.png?raw=true)
 
 What comes back looks right. At thumbnail size — the size of the generation preview, the size of your browser window — it reads as a small armored figure. You feel a small triumph. You drag the file into Unity, set the sprite's Pixels Per Unit to 16, and drop it into your scene.
 
@@ -40,7 +40,7 @@ p_out = (1-u)(1-v)·p₁ + u(1-v)·p₂ + (1-u)v·p₃ + uv·p₄
 
 This is a weighted blend. When you downscale a 512×512 image to 16×16, every output pixel is a blend of approximately (512/16)² = 1,024 source pixels. The distinct color values that formed recognizable features are averaged into muddy intermediates. A sharp black outline and its neighboring beige fill blend into a dark tan. Blending is irreversible: once four source pixels have been averaged into one output pixel, you cannot recover the four original values. The information is gone.
 
-![Bilinear interpolation annotated 2×2 grid](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/02c_bilinear_annotated_grid.png?raw=true)
+![Bilinear interpolation annotated 2×2 grid](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/02c_bilinear_annotated_grid.png?raw=true)
 
 Pixel art is not a visual style. It is a constraint system. A 16×16 sprite on an eight-color palette has exactly 256 pixels, each of which must take one of eight discrete color values. There is no anti-aliasing — if each pixel has one value, there are no subpixel values to blend across an edge. The aesthetic is inseparable from the constraint.
 
@@ -78,23 +78,23 @@ Beyond generation, Unity's import settings are a second non-trivial decision. Un
 
 ## The Failure Case
 
-![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/05_full_pipeline_comparison.png?raw=true)
+![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/05_full_pipeline_comparison.png?raw=true)
 
 The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong sub-tool selection, wrong import settings — that produce identical symptoms and require different fixes.
 
 **Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool.
 
-![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/01_failure_A.png?raw=true)
+![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/01_failure_A.png?raw=true)
 
 **Failure Mode 2 — Wrong sub-tool selection.** You open PixelLab, reach for the Character Creator (the most prominent entry point for humanoid sprites), and generate at 24×24 — the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
 
-![Failure Mode 2 — PixelLab Character Creator 24×24 scaled to 16×16](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/02_failure_B.png?raw=true)
+![Failure Mode 2 — PixelLab Character Creator 24×24 scaled to 16×16](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/02_failure_B.png?raw=true)
 
 Fix: route to PixelLab's Simple Creator with the BitForge canvas, which supports native 16×16 generation. Accept the tradeoff: fewer detail pixels means simpler silhouettes, but the grid is mathematically intact from generation through Unity import.
 
 **Failure Mode 3 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
-![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/03_failure_C_unity_settings.png?raw=true)
+![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/03_failure_C_unity_settings.png?raw=true)
 
 These three failures share one surface appearance: a blurry sprite in the Unity scene view. But their root causes are distinct and their fixes are non-overlapping. Fixing only the import settings cannot address Failure Mode 1. Switching to PixelLab cannot address Failure Mode 2 unless you also change the import settings. Choosing the correct PixelLab sub-tool cannot address Failure Mode 3 if you then pass the asset through a bilinear resize step.
 
@@ -112,7 +112,7 @@ The distinction between "intentionally retro" and "accidentally broken" is, to a
 
 Reproduce this failure in under fifteen minutes, then fix it. The goal is to make the three failure modes directly observable and distinguishable from each other.
 
-![Human Decision Node — scale ratio ACCEPT/REJECT chart](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/04_human_decision_node.png?raw=true)
+![Human Decision Node — scale ratio ACCEPT/REJECT chart](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/04_human_decision_node.png?raw=true)
 
 **Step 1 — Trigger Failure Mode 1 and 3 simultaneously:**
 Open DALL-E or Gemini and prompt for a 16×16 pixel art knight, top-down view, transparent background, no anti-aliasing. Download the output. Import into Unity without adjusting import settings — leave Filter Mode at Bilinear. Set Pixels Per Unit to 16. Drop into a scene and zoom the Scene view to 1:1. Observe: soft edges, color bleed, no discrete grid.
