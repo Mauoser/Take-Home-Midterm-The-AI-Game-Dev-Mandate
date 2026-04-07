@@ -1,4 +1,4 @@
-# When the Grid Disappears: Why Generative AI Fails at 16×16 Pixel Art and What to Do Instead
+# When the Lines Get Blurred: Why Generative AI Fails at 16×16 Pixel Art and What to Do Instead
 
 *A pipeline diagnostic for indie developers — and a transferable principle for every AI tool in your stack.*
 
