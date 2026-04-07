@@ -1,5 +1,5 @@
 # Author's Note
-## *When the Grid Disappears: Why Generative AI Fails at 16×16 Pixel Art and What to Do Instead*
+## *When The Lines Get Blurred: Why Generative AI Fails at 16×16 Pixel Art and What to Do Instead*
 CSYE 7270: Virtual Environments and Real-Time 3D — Take-Home Midterm — Lei Zhang
 
 ---
