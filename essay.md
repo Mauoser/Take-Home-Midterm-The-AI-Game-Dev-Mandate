@@ -38,6 +38,9 @@ p_out = (1-u)(1-v)·p₁ + u(1-v)·p₂ + (1-u)v·p₃ + uv·p₄
 
 This is a weighted blend. When you downscale a 512×512 image to 16×16, every output pixel is a blend of approximately (512/16)² = 1,024 source pixels. The distinct color values that formed recognizable features are averaged into muddy intermediates. A sharp black outline and its neighboring beige fill blend into a dark tan. Blending is irreversible: once four source pixels have been averaged into one output pixel, you cannot recover the four original values. The information is gone.
 
+![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
+*Figure 1. Ground truth: a 16×16 knight sprite constructed from an explicit 8-color palette. Every pixel holds exactly one discrete color value. This is the target output the pipeline must preserve from generation through Unity import.*
+
 Pixel art is not a visual style. It is a constraint system. A 16×16 sprite on an eight-color palette has exactly 256 pixels, each of which must take one of eight discrete color values. There is no anti-aliasing — if each pixel has one value, there are no subpixel values to blend across an edge. The aesthetic is inseparable from the constraint.
 
 A general-purpose diffusion model cannot produce this because it does not have a concept of pixel boundaries. The neural network processes images as tensors of continuous floating-point values, not as indexed grids of discrete colors. It has learned the *signature* of pixel art and reproduces that signature as a photorealistic impression of pixel art — rendered in continuous space at high resolution. It produces something that looks like pixel art the same way a painting of a photograph looks like a photograph until you're close enough to see the brushwork. The discrete grid is not a visual style you can prompt into existence. It is a structural property of the artifact.
