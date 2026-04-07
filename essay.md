@@ -92,7 +92,7 @@ The blur you observed in Unity is not one problem. It is three distinct failures
 
 **Failure Mode 3 — Wrong sub-tool selection.** You open PixelLab, reach for the Character Creator (the most prominent entry point for humanoid sprites), and generate at 24×24 — the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
 
-![Failure Mode 3 — correct sprite with wrong Unity import settings]([output/03_failure_C_unity_settings.png](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/03_failure_C_unity_settings.png?raw=true))
+![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/03_failure_C_unity_settings.png?raw=true)
 
 Fix: route to PixelLab's Simple Creator with the BitForge canvas, which supports native 16×16 generation. Accept the tradeoff: fewer detail pixels means simpler silhouettes, but the grid is mathematically intact from generation through Unity import.
 
