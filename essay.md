@@ -73,7 +73,9 @@ Beyond the generation pipeline, Unity's import settings are a second non-trivial
 
 The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong generation size, wrong import settings — that produce identical symptoms and require different fixes.
 
-**Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool like PixelLab.
+**Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it.
+
+Fix: use a pixel-native generation tool like PixelLab.
 
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/05_full_pipeline_comparison.png?raw=true)
 
@@ -83,7 +85,9 @@ Fix: generate at 32×32 instead. The 32→16 ratio is exactly 2:1 — every outp
 
 ![Failure Mode 2 — PixelLab Character Creator 24×24 scaled to 16×16](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/02_failure_B.png?raw=true)
 
-**Failure Mode 3 — Wrong Unity import settings.** You correctly use PixelLab's Character Creator at 32×32, scale to 16×16, and clean up the result manually. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
+**Failure Mode 3 — Wrong Unity import settings.** You correctly use PixelLab's Character Creator at 32×32, scale to 16×16, and clean up the result manually. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file.
+
+Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
 ![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/03_failure_C_unity_settings.png?raw=true)
 
