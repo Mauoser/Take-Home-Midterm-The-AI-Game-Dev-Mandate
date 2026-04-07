@@ -29,8 +29,8 @@ This repository contains the technical essay, demo notebook, and author's note t
 ├── essay.md                        # Technical essay (~2,200 words)
 ├── authors_note.docx               # 3-page reflection (design choices, tool usage, self-assessment)
 ├── pixel_art_pipeline_demo.ipynb   # Jupyter notebook — runnable demo
-└── output/                         # Generated figures (produced by running the notebook)
-    ├── 00_ground_truth_16x16.png       # Hand-crafted 8-color ground truth sprite
+└── images/                         # Generated figures (produced by running the notebook)
+    ├── 00_ground_truth.png       # Hand-crafted 8-color ground truth sprite
     ├── 01_failure_A.png                # Failure Mode 1: DALL-E + bilinear downscale
     ├── 02_failure_B.png                # Failure Mode 2: PixelLab 24×24 + manual scale
     ├── 02c_bilinear_annotated_grid.png # Figure 2: Bilinear interpolation 2×2 grid diagram
