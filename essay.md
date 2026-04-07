@@ -10,13 +10,13 @@
 
 You are three weeks into building a top-down RPG in Unity. The art style is retro — 16×16 sprites, a fixed eight-color palette, the kind of constrained visual language that made *Undertale* feel handcrafted and *Celeste* feel intentional. You do not have a pixel artist on your team, so you do the reasonable thing: you open a browser tab, type a prompt into DALL-E or Gemini, and ask for a knight.
 
-What comes back looks right. At thumbnail size — the size of the generation preview, the size of your browser window — it reads as a small armored figure. You feel a small triumph. You drag the file into Unity, set the sprite's Pixels Per Unit to 16, and drop it into your scene.
-
-It dissolves.
-
 ![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
 
 *Figure 1. Ground truth: a 16×16 knight sprite constructed from an explicit 8-color palette. Every pixel holds exactly one discrete color value. This is the target output the pipeline must preserve from generation through Unity import.*
+
+What comes back looks right. At thumbnail size — the size of the generation preview, the size of your browser window — it reads as a small armored figure. You feel a small triumph. You drag the file into Unity, set the sprite's Pixels Per Unit to 16, and drop it into your scene.
+
+It dissolves.
 
 This is not a prompting problem. It is an architectural one — and every fix you try from inside the prompt box will fail for the same reason.
 
