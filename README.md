@@ -12,7 +12,7 @@ Category C — AI Tools Evaluation for Game Dev
 
 ## The Argument
 
-![alt text](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/05_full_pipeline_comparison.png?raw=true)
+![alt text](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/05_full_pipeline_comparison.png?raw=true)
 
 The blur you see when importing an AI-generated sprite into Unity is not one problem. It is **three distinct failures** — wrong model category, wrong Unity import settings, wrong sub-tool selection — that produce **identical symptoms** and require **different fixes**.
  
@@ -29,7 +29,7 @@ This repository contains the technical essay, demo notebook, and author's note t
 ├── essay.md                        # Technical essay (~2,200 words)
 ├── authors_note.docx               # 3-page reflection (design choices, tool usage, self-assessment)
 ├── pixel_art_pipeline_demo.ipynb   # Jupyter notebook — runnable demo
-└── images/                         # Generated figures (produced by running the notebook)
+└── output/                         # Generated figures (produced by running the notebook)
     ├── 00_ground_truth.png       # Hand-crafted 8-color ground truth sprite
     ├── 01_failure_A.png                # Failure Mode 1: DALL-E + bilinear downscale
     ├── 02_failure_B.png                # Failure Mode 2: PixelLab 24×24 + manual scale
