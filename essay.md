@@ -112,6 +112,8 @@ The distinction between "intentionally retro" and "accidentally broken" is, to a
 
 Reproduce this failure in under fifteen minutes, then fix it. The goal is to make the three failure modes directly observable and distinguishable from each other.
 
+![Human Decision Node — scale ratio ACCEPT/REJECT chart](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/04_human_decision_node.png?raw=true)
+
 **Step 1 — Trigger Failure Mode 1 and 3 simultaneously:**
 Open DALL-E or Gemini and prompt for a 16×16 pixel art knight, top-down view, transparent background, no anti-aliasing. Download the output. Import into Unity without adjusting import settings — leave Filter Mode at Bilinear. Set Pixels Per Unit to 16. Drop into a scene and zoom the Scene view to 1:1. Observe: soft edges, color bleed, no discrete grid.
 
