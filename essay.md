@@ -12,8 +12,6 @@ You are three weeks into building a top-down RPG in Unity. The art style is retr
 
 ![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
 
-*Figure 1. Ground truth: a 16×16 knight sprite constructed from an explicit 8-color palette. Every pixel holds exactly one discrete color value. This is the target output the pipeline must preserve from generation through Unity import.*
-
 What comes back looks right. At thumbnail size — the size of the generation preview, the size of your browser window — it reads as a small armored figure. You feel a small triumph. You drag the file into Unity, set the sprite's Pixels Per Unit to 16, and drop it into your scene.
 
 It dissolves.
@@ -43,8 +41,6 @@ p_out = (1-u)(1-v)·p₁ + u(1-v)·p₂ + (1-u)v·p₃ + uv·p₄
 This is a weighted blend. When you downscale a 512×512 image to 16×16, every output pixel is a blend of approximately (512/16)² = 1,024 source pixels. The distinct color values that formed recognizable features are averaged into muddy intermediates. A sharp black outline and its neighboring beige fill blend into a dark tan. Blending is irreversible: once four source pixels have been averaged into one output pixel, you cannot recover the four original values. The information is gone.
 
 ![Bilinear interpolation annotated 2×2 grid](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/02c_bilinear_annotated_grid.png?raw=true)
-
-*Figure 2. Bilinear interpolation (left) vs. nearest-neighbor / Point filter (right) on a 2×2 pixel grid. At coordinates (u=0.5, v=0.5), bilinear weighting produces an output of 115 — a blend never equal to any source pixel value. Nearest-neighbor returns 200, the exact value of the nearest source pixel. Unity's default Filter Mode: Bilinear applies the left operation at render time; Filter Mode: Point applies the right.*
 
 Pixel art is not a visual style. It is a constraint system. A 16×16 sprite on an eight-color palette has exactly 256 pixels, each of which must take one of eight discrete color values. There is no anti-aliasing — if each pixel has one value, there are no subpixel values to blend across an edge. The aesthetic is inseparable from the constraint.
 
@@ -84,15 +80,11 @@ Beyond generation, Unity's import settings are a second non-trivial decision. Un
 
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/05_full_pipeline_comparison.png?raw=true)
 
-*Figure 3. All three failure modes and the correct pipeline at 1:1 pixel-grid zoom. Left to right: Path A (DALL-E + bilinear downscale), Path B (PixelLab Character Creator 24×24 + manual scale), Path C (correct sprite + Unity Bilinear filter), Correct (PixelLab BitForge 16×16 + Point filter). All three failure paths produce visually identical output despite having distinct root causes and requiring different fixes.*
-
 The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong sub-tool selection, wrong import settings — that produce identical symptoms and require different fixes.
 
 **Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool.
 
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/01_failure_A.png?raw=true)
-
-*Figure 4. Failure Mode 1: general-purpose diffusion model output downscaled to 16×16 using bilinear interpolation. Left: ground truth (8 unique colors, discrete grid). Right: simulated DALL-E output after bilinear downscale (142 unique colors — a 17.8× color explosion). Every output pixel is a weighted blend of approximately 1,024 source pixels. The discrete grid was never present in the source; no import setting can reconstruct it.*
 
 **Failure Mode 2 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
