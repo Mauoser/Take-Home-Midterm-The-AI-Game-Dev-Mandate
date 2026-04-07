@@ -105,7 +105,7 @@ The distinction between "intentionally retro" and "accidentally broken" is wheth
 
 ## The Exercise
 
-Reproduce this failure in under fifteen minutes, then fix it. The goal is to make the three failure modes directly observable and distinguishable from each other.
+Reproduce this failure in under fifteen minutes, then fix it. The goal is to make the three failure paths directly observable and distinguishable from each other.
 
 ![Human Decision Node — scale ratio ACCEPT/REJECT chart](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/04_human_decision_node.png?raw=true)
 
