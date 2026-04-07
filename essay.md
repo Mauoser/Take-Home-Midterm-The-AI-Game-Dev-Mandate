@@ -50,53 +50,44 @@ A general-purpose diffusion model cannot produce this because it does not have a
 
 ## The Design Decision
 
-The real decision a developer faces is not "which prompt gets me better pixel art." It is "which tool category belongs in my pipeline for this resolution target."
+The real decision a developer faces is not "which prompt gets me better pixel art." It is "which pipeline produces correct output at 16×16."
 
-There are three credible approaches, each with meaningfully different tradeoffs.
+**Approach 1 — Pixel-native generation with manual cleanup.** Tools like PixelLab.ai generate pixel art natively, but 16×16 sits below the reliable working resolution for most of their AI models — the models struggle to produce coherent detail at that density. The correct pipeline for any 16×16 asset (characters, objects, tilesets, UI elements) is:
 
-**Approach 1 — Pixel-native generation.** Tools like PixelLab.ai and fine-tuned Stable Diffusion LoRAs trained on pixel art datasets generate at resolutions where the grid is semantically native to the model. This approach requires understanding which sub-tool to use within PixelLab — and this is where the decision becomes genuinely non-trivial:
+1. Generate at 32×32 using PixelLab's Character Creator
+2. Scale down to 16×16 in Aseprite, Pixelorama, or Photoshop using nearest-neighbor resampling
+3. Manually clean up the result — sharpen silhouette edges, correct any palette violations introduced by the scale step
+4. Import into Unity with Filter Mode: Point (no filter) and Compression: None
 
-| PixelLab sub-tool | 16×16 support | Notes |
-|---|---|---|
-| Character Creator | No (min 24×24) | Wrong choice for 16×16 characters |
-| Simple Creator (BitForge canvas) | Yes | Correct for 16×16 sprites and icons |
-| Aseprite extension (Create Texture) | Yes | Correct for 16×16 tileables |
-| Rotate Tool | Yes | Designed for animation, not static sprites |
-| Skeleton Animation | Yes | Designed for animation, not static sprites |
+The critical decision within this pipeline is 32×32, not 24×24. The Character Creator's minimum canvas is 24×24, and it produces valid pixel art at that size. But 24→16 is a 1.5:1 non-integer ratio — any resampling algorithm must interpolate, introducing artifacts before the manual cleanup stage even begins. 32→16 is exactly 2:1: every output pixel maps to four source pixels, nearest-neighbor makes clean predictable choices, and less manual correction is needed.
 
-The Character Creator is the most prominent entry point in PixelLab's interface. A developer who reaches for it without reading documentation will generate at 24×24 and scale down — reintroducing exactly the interpolation artifacts they were trying to avoid.
+**Approach 2 — Concept-to-manual refinement.** Use a general-purpose model to generate high-resolution concept references, then hand-craft the actual sprite in Aseprite or LibreSprite. The AI accelerates ideation; a human makes every pixel decision. This produces the highest quality but requires pixel art skill.
 
-**Approach 2 — Concept-to-manual refinement.** Use a general-purpose model to generate high-resolution concept references, then hand-craft the actual sprite in Aseprite or LibreSprite. The AI accelerates ideation; a human makes the 256 pixel decisions. This produces the highest quality but requires pixel art skill or time investment to develop it.
+**Approach 3 — Automated post-processing without manual cleanup.** Generate at a larger size and apply automated quantization without the manual editing step. At 16×16, skipping manual cleanup is the failure — automated quantization does not make the compositional decisions a pixel artist would, and the resulting artifacts are visually indistinguishable from interpolation failures.
 
-**Approach 3 — Hybrid post-processing.** Generate a high-resolution concept, run it through a pixel art quantization pipeline (Aseprite's indexed color conversion or a custom quantization script), then manually touch up the result. This can work at 32×32 and above. At 16×16, the margin for error is too narrow — quantization algorithms do not make the same compositional decisions a pixel artist would, and the failure modes look identical to the failures you were trying to avoid.
-
-For a developer building a Unity RPG solo or in a small team with no pixel art background, use Approach 1 with PixelLab's Simple Creator (BitForge canvas) for character sprites and the Aseprite extension's Create Texture tool for tileables.
-
-Beyond generation, Unity's import settings are a second non-trivial decision. Unity's default Filter Mode is Bilinear — designed for high-resolution textures that need smooth scaling. For pixel art, this re-applies interpolation at render time, blurring a pixel-perfect source file every frame. The correct settings are Filter Mode: Point (no filter), Compression: None, and Pixels Per Unit matched exactly to the sprite's canvas size (Unity 2022 LTS and later).
+Beyond the generation pipeline, Unity's import settings are a second non-trivial decision. Unity's default Filter Mode is Bilinear — designed for high-resolution textures that need smooth scaling. For pixel art, this re-applies interpolation at render time, blurring a correct source file every frame. The correct settings are Filter Mode: Point (no filter), Compression: None, and Pixels Per Unit matched exactly to the sprite's canvas size (Unity 2022 LTS and later).
 
 ---
 
 ## The Failure Case
 
+The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong generation size, wrong import settings — that produce identical symptoms and require different fixes.
+
+**Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool like PixelLab.
+
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/05_full_pipeline_comparison.png?raw=true)
 
-The blur you observed in Unity is not one problem. It is three distinct failures — wrong model category, wrong sub-tool selection, wrong import settings — that produce identical symptoms and require different fixes.
+**Failure Mode 2 — Wrong generation size within the correct tool.** You open PixelLab and reach for the Character Creator — the most prominent entry point for humanoid sprites. You generate at 24×24, the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
 
-**Failure Mode 1 — Wrong model category.** You use DALL-E, Gemini, or Midjourney to generate a 16×16 sprite. The model generates in continuous high-resolution space. Bilinear downscaling averages ~1,024 source pixels per output pixel. The discrete grid was never present; no import setting can reconstruct it. Fix: use a pixel-native generation tool.
-
-![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/01_failure_A.png?raw=true)
-
-**Failure Mode 2 — Wrong sub-tool selection.** You open PixelLab, reach for the Character Creator (the most prominent entry point for humanoid sprites), and generate at 24×24 — the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
+Fix: generate at 32×32 instead. The 32→16 ratio is exactly 2:1 — every output pixel maps to four source pixels, nearest-neighbor resampling makes clean predictable choices, and the manual cleanup step starts from a better baseline. Then manually edit the scaled-down result in Aseprite, Pixelorama, or Photoshop before importing.
 
 ![Failure Mode 2 — PixelLab Character Creator 24×24 scaled to 16×16](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/02_failure_B.png?raw=true)
 
-Fix: route to PixelLab's Simple Creator with the BitForge canvas, which supports native 16×16 generation. Accept the tradeoff: fewer detail pixels means simpler silhouettes, but the grid is mathematically intact from generation through Unity import.
-
-**Failure Mode 3 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
+**Failure Mode 3 — Wrong Unity import settings.** You correctly use PixelLab's Character Creator at 32×32, scale to 16×16, and clean up the result manually. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
 ![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/03_failure_C_unity_settings.png?raw=true)
 
-These three failures share one surface appearance: a blurry sprite in the Unity scene view. But their root causes are distinct and their fixes are non-overlapping. Fixing only the import settings cannot address Failure Mode 1. Switching to PixelLab cannot address Failure Mode 2 unless you also change the import settings. Choosing the correct PixelLab sub-tool cannot address Failure Mode 3 if you then pass the asset through a bilinear resize step.
+These three failures share one surface appearance: a blurry sprite in the Unity scene view. But their root causes are distinct and their fixes are non-overlapping. Fixing only the import settings cannot address Failure Mode 1. Switching to PixelLab cannot address Failure Mode 3 unless you also change the import settings. Choosing the correct generation size cannot address Failure Mode 2 if you then scale down with bilinear resampling.
 
 The diagnostic question — *at which pipeline boundary was the discrete grid lost?* — is the question you need to ask first, before touching a prompt or a setting.
 
@@ -104,7 +95,7 @@ This diagnostic reflex generalizes. When a language model produces code that pas
 
 **The production failure.** The worst version of this failure does not happen in a thirty-minute prototyping session. A team generates 200 sprites using DALL-E. The sprites look acceptable in Unity's Scene view at default zoom, which compensates for blur by showing the scene at a scale where individual pixels are invisible. Three weeks pass. They ship a playtest build. The feedback is consistent: "the art looks low quality." Not retro. Not charming. Low quality.
 
-The distinction between "intentionally retro" and "accidentally broken" is, to a player, whether the pixel grid is intact. Recovering from this means regenerating every asset through the correct pipeline — not revising prompts. Three weeks of iteration on the wrong foundation must be rebuilt on the correct one.
+The distinction between "intentionally retro" and "accidentally broken" is whether the pixel grid is intact. Recovering from this means rebuilding every asset through the correct pipeline. Three weeks of iteration on the wrong foundation must be rebuilt on the correct one.
 
 ---
 
@@ -114,21 +105,16 @@ Reproduce this failure in under fifteen minutes, then fix it. The goal is to mak
 
 ![Human Decision Node — scale ratio ACCEPT/REJECT chart](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/04_human_decision_node.png?raw=true)
 
-**Step 1 — Trigger Failure Mode 1 and 3 simultaneously:**
-Open DALL-E or Gemini and prompt for a 16×16 pixel art knight, top-down view, transparent background, no anti-aliasing. Download the output. Import into Unity without adjusting import settings — leave Filter Mode at Bilinear. Set Pixels Per Unit to 16. Drop into a scene and zoom the Scene view to 1:1. Observe: soft edges, color bleed, no discrete grid.
+**Step 1 — Trigger Failure Mode 1:**
+Open DALL-E or Gemini and prompt for a 16×16 pixel art knight, top-down view, transparent background, no anti-aliasing. Download the output. Import into Unity with Filter Mode: Point and Compression: None. Set Pixels Per Unit to 16. Drop into a scene and zoom the Scene view to 1:1. Observe: soft edges, color bleed, no discrete grid. This is Failure Mode 1 — the generation pipeline produced continuous-space output that no import setting can fix.
 
-**Step 2 — Isolate Failure Mode 3:**
-Without changing the source file, change Filter Mode to Point (no filter) and Compression to None in Unity's texture importer. Re-examine at the same zoom. The sprite is crisper — render-time interpolation is gone — but the underlying anti-aliasing from generation is still present. Individual pixels are blended colors, not discrete palette values. The sprite is better but still wrong. This demonstrates that the import fix cannot resolve a problem located upstream at generation.
+**Step 2 — Trigger Failure Mode 2:**
+Open PixelLab's Character Creator. Generate the same knight at 24×24 — the minimum canvas size. In Aseprite, scale down to 16×16 using bilinear resampling (the default). Import into Unity with Point filter and no compression. Observe: blurry output, indistinguishable from Failure Mode 1, despite using a pixel-native tool. The failure is the non-integer scale ratio: 24/16 = 1.5, so bilinear interpolation was unavoidable. Now repeat the same step but generate at 32×32 instead. Scale to 16×16 with nearest-neighbor resampling. The result is cleaner — fewer artifacts, clearer silhouette. Manually touch up any edges that still look ambiguous, then re-import. This is the correct output from the pixel-native pipeline.
 
-**Step 3 — Fix Failure Mode 1:**
-Open PixelLab's Simple Creator, select the BitForge canvas at 16×16, generate the same knight with an eight-color palette constraint. Import with Point filter and no compression. Compare with your DALL-E result at the same zoom. Pixel boundaries should be hard; colors discrete.
+**Step 3 — Trigger Failure Mode 3:**
+Take your clean 32×32-sourced sprite from Step 2. In Unity's texture importer, change Filter Mode back to Bilinear (the default). Re-examine at the same zoom. The same blurry output returns — indistinguishable from Failures 1 and 2 — despite a correct source file. Change Filter Mode back to Point. The blur disappears. One import setting, applied to an otherwise correct source, determines the final result.
 
-**Step 4 — Introduce Failure Mode 2 deliberately:**
-Take your clean PixelLab output. Resize it in Photoshop or Figma using bilinear resampling from 16×16 to 64×64, then back to 16×16. Import the result into Unity with correct Point filter settings. The sprite is blurry again, indistinguishable from the DALL-E output, despite having originated from a pixel-native generator and despite having correct import settings.
-
-One resize step — a single pipeline boundary — destroyed the discrete grid that the correct generation pipeline produced.
-
-The exercise demonstrates a single principle across four configurations: correct import settings cannot compensate for an upstream blur; correct tool selection cannot compensate for a downstream blur; and every processing step between generation and Unity import is a pipeline decision with the power to undo correct upstream choices.
+The exercise demonstrates a single principle: the same symptom appears at three different pipeline stages, and fixing any one stage in isolation does not fix the others.
 
 ---
 
@@ -136,12 +122,8 @@ The exercise demonstrates a single principle across four configurations: correct
 
 A diffusion model generates in continuous high-resolution space. Pixel art is defined by discrete low-resolution constraints. These two properties are architecturally incompatible, and no prompt instruction resolves the incompatibility.
 
-The blur you observe in Unity is not a single failure. It is three distinct failures — wrong model category, wrong import settings, wrong sub-tool selection — that produce identical symptoms and require different fixes. Diagnosing which failure is present requires identifying the pipeline boundary at which the discrete grid constraint was dropped.
+The blur you observe in Unity is not a single failure. It is three distinct failures — wrong model category, wrong generation size, wrong import settings — that produce identical symptoms and require different fixes. Diagnosing which failure is present requires identifying the pipeline stage where the constraint was dropped, not adjusting the prompt.
 
-This diagnostic reflex — *where in the pipeline was the constraint lost?* — is the transferable principle. It applies to every AI tool you integrate into a production pipeline. The tool's internal behavior is often correct, or correct enough; the failure lives at the boundary between tools.
+This diagnostic reflex — *where in the pipeline was the constraint lost?* — applies to every AI tool in a production pipeline. The tool's internal behavior is often correct; the failure lives at the boundary between stages.
 
-For 16×16 sprites specifically: use PixelLab's Simple Creator with the BitForge canvas. Set Unity's texture importer to Point filter mode and no compression. Introduce no resize steps between generation and import. Evaluate the result in your actual game scene, not your tool's preview.
-
-The prompt is the least important variable. The pipeline is everything.
-
-
+For 16×16 sprites: generate at 32×32 in PixelLab's Character Creator, scale to 16×16 with nearest-neighbor resampling in Aseprite, Pixelorama, or Photoshop, clean up manually, then set Unity's texture importer to Point filter and no compression. The prompt is the least important variable. The pipeline is everything.
