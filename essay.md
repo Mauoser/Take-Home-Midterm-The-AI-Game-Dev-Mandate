@@ -14,6 +14,10 @@ What comes back looks right. At thumbnail size — the size of the generation pr
 
 It dissolves.
 
+![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
+
+*Figure 1. Ground truth: a 16×16 knight sprite constructed from an explicit 8-color palette. Every pixel holds exactly one discrete color value. This is the target output the pipeline must preserve from generation through Unity import.*
+
 This is not a prompting problem. It is an architectural one — and every fix you try from inside the prompt box will fail for the same reason.
 
 The edges are soft. Colors bleed into each other at the boundaries. What read as a knight at 512×512 is a beige smear at 16×16. You try adjusting the prompt: *no anti-aliasing, crisp edges, hard pixel boundaries, indexed color palette*. The outputs improve slightly, then plateau. You try Gemini. Same result, different smear. You spend an afternoon iterating on prompt language, convinced that the right words will unlock the crisp pixel art you need.
@@ -40,15 +44,11 @@ This is a weighted blend. When you downscale a 512×512 image to 16×16, every o
 
 ![Bilinear interpolation annotated 2×2 grid](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/02c_bilinear_annotated_grid.png?raw=true)
 
-*Figure 1. Bilinear interpolation (left) vs. nearest-neighbor / Point filter (right) on a 2×2 pixel grid. At coordinates (u=0.5, v=0.5), bilinear weighting produces an output of 115 — a blend never equal to any source pixel value. Nearest-neighbor returns 200, the exact value of the nearest source pixel. Unity's default Filter Mode: Bilinear applies the left operation at render time; Filter Mode: Point applies the right.*
+*Figure 2. Bilinear interpolation (left) vs. nearest-neighbor / Point filter (right) on a 2×2 pixel grid. At coordinates (u=0.5, v=0.5), bilinear weighting produces an output of 115 — a blend never equal to any source pixel value. Nearest-neighbor returns 200, the exact value of the nearest source pixel. Unity's default Filter Mode: Bilinear applies the left operation at render time; Filter Mode: Point applies the right.*
 
 Pixel art is not a visual style. It is a constraint system. A 16×16 sprite on an eight-color palette has exactly 256 pixels, each of which must take one of eight discrete color values. There is no anti-aliasing — if each pixel has one value, there are no subpixel values to blend across an edge. The aesthetic is inseparable from the constraint.
 
 A general-purpose diffusion model cannot produce this because it does not have a concept of pixel boundaries. The neural network processes images as tensors of continuous floating-point values, not as indexed grids of discrete colors. It has learned the *signature* of pixel art and reproduces that signature as a photorealistic impression of pixel art — rendered in continuous space at high resolution. It produces something that looks like pixel art the same way a painting of a photograph looks like a photograph until you're close enough to see the brushwork. The discrete grid is not a visual style you can prompt into existence. It is a structural property of the artifact.
-
-![Ground truth 16×16 knight sprite](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/00_ground_truth.png?raw=true)
-
-*Figure 2. Ground truth: a 16×16 knight sprite constructed from an explicit 8-color palette. Every pixel holds exactly one discrete color value. This is the target output the pipeline must preserve from generation through Unity import.*
 
 ---
 
