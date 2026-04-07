@@ -112,16 +112,16 @@ The distinction between "intentionally retro" and "accidentally broken" is, to a
 
 Reproduce this failure in under fifteen minutes, then fix it. The goal is to make the three failure modes directly observable and distinguishable from each other.
 
-**Step 1 — Trigger Failure Mode 1 and 2 simultaneously:**
+**Step 1 — Trigger Failure Mode 1 and 3 simultaneously:**
 Open DALL-E or Gemini and prompt for a 16×16 pixel art knight, top-down view, transparent background, no anti-aliasing. Download the output. Import into Unity without adjusting import settings — leave Filter Mode at Bilinear. Set Pixels Per Unit to 16. Drop into a scene and zoom the Scene view to 1:1. Observe: soft edges, color bleed, no discrete grid.
 
-**Step 2 — Isolate Failure Mode 2:**
+**Step 2 — Isolate Failure Mode 3:**
 Without changing the source file, change Filter Mode to Point (no filter) and Compression to None in Unity's texture importer. Re-examine at the same zoom. The sprite is crisper — render-time interpolation is gone — but the underlying anti-aliasing from generation is still present. Individual pixels are blended colors, not discrete palette values. The sprite is better but still wrong. This demonstrates that the import fix cannot resolve a problem located upstream at generation.
 
 **Step 3 — Fix Failure Mode 1:**
 Open PixelLab's Simple Creator, select the BitForge canvas at 16×16, generate the same knight with an eight-color palette constraint. Import with Point filter and no compression. Compare with your DALL-E result at the same zoom. Pixel boundaries should be hard; colors discrete.
 
-**Step 4 — Introduce Failure Mode 3 deliberately:**
+**Step 4 — Introduce Failure Mode 2 deliberately:**
 Take your clean PixelLab output. Resize it in Photoshop or Figma using bilinear resampling from 16×16 to 64×64, then back to 16×16. Import the result into Unity with correct Point filter settings. The sprite is blurry again, indistinguishable from the DALL-E output, despite having originated from a pixel-native generator and despite having correct import settings.
 
 One resize step — a single pipeline boundary — destroyed the discrete grid that the correct generation pipeline produced.
