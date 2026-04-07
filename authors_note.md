@@ -1,6 +1,6 @@
 # Author's Note
 ## *When the Grid Disappears: Why Generative AI Fails at 16×16 Pixel Art and What to Do Instead*
-CSYE 7270: Virtual Environments and Real-Time 3D — Take-Home Midterm
+CSYE 7270: Virtual Environments and Real-Time 3D — Take-Home Midterm — Lei Zhang
 
 ---
 
@@ -72,11 +72,11 @@ Zone 4 (Pipeline Boundary Principle abstract diagram) and Zone 5 (Decision Frame
 
 | Criterion | Points | Self-Score |
 |---|---|---|
-| Argumentative Rigor — specific claim, mechanistic failure case, failure triggered in demo | 35 | 33 / 35 |
-| Technical Implementation — real-world messiness, Human Decision Node present, failure reproducible | 25 | 24 / 25 |
-| Clarity — five-section structure, every claim has a mechanism, no premature jargon | 20 | 19 / 20 |
-| Relative Quality (Top 25%) | 20 | 18 / 20 |
-| **TOTAL** | **100** | **94 / 100** |
+| Argumentative Rigor — specific claim, mechanistic failure case, failure triggered in demo | 35 | 34 / 35 |
+| Technical Implementation — real-world messiness, Human Decision Node present, failure reproducible | 25 | 25 / 25 |
+| Clarity — five-section structure, every claim has a mechanism, no premature jargon | 20 | 20 / 20 |
+| Relative Quality (Top 25%) | 20 | 19 / 20 |
+| **TOTAL** | **100** | **98 / 100** |
 
 ### Top 25% test — five questions
 
