@@ -12,7 +12,7 @@ Category C — AI Tools Evaluation for Game Dev
 
 ## The Argument
 
-![alt text](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/05_full_pipeline_comparison.png?raw=true)
+![alt text](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/05_full_pipeline_comparison.png?raw=true)
 
 The blur you see when importing an AI-generated sprite into Unity is not one problem. It is **three distinct failures** — wrong model category, wrong Unity import settings, wrong sub-tool selection — that produce **identical symptoms** and require **different fixes**.
 
