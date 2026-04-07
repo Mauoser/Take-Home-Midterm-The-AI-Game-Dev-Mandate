@@ -130,6 +130,8 @@ The blur you observe in Unity is not a single failure. It is three distinct fail
 
 This diagnostic reflex — *where in the pipeline was the constraint lost?* — applies to every AI tool in a production pipeline. The tool's internal behavior is often correct; the failure lives at the boundary between stages.
 
+For 16×16 sprites: generate at 32×32 in PixelLab's Character Creator, scale to 16×16 with nearest-neighbor resampling in Aseprite, Pixelorama, or Photoshop, clean up manually, then set Unity's texture importer to Point filter and no compression.
+
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/output/05_full_pipeline_comparison.png?raw=true)
 
-For 16×16 sprites: generate at 32×32 in PixelLab's Character Creator, scale to 16×16 with nearest-neighbor resampling in Aseprite, Pixelorama, or Photoshop, clean up manually, then set Unity's texture importer to Point filter and no compression. The prompt is the least important variable. The pipeline is everything.
+The prompt is the least important variable. The pipeline is everything.
