@@ -86,15 +86,15 @@ The blur you observed in Unity is not one problem. It is three distinct failures
 
 ![Full pipeline comparison — three failures and correct pipeline](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/01_failure_A.png?raw=true)
 
-**Failure Mode 2 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
+**Failure Mode 2 — Wrong sub-tool selection.** You open PixelLab, reach for the Character Creator (the most prominent entry point for humanoid sprites), and generate at 24×24 — the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
 
 ![Failure Mode 2 — PixelLab Character Creator 24×24 scaled to 16×16](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/02_failure_B.png?raw=true)
 
-**Failure Mode 3 — Wrong sub-tool selection.** You open PixelLab, reach for the Character Creator (the most prominent entry point for humanoid sprites), and generate at 24×24 — the minimum canvas. You scale down to 16×16 in Aseprite using bilinear resampling (the default). The result is blurry. The causal chain: Character Creator generates at 24×24 (minimum) → manual scale to 16×16 → bilinear resampling applied → 24/16 = 1.5, a non-integer ratio meaning every output pixel is an interpolated blend → discrete grid destroyed → result is indistinguishable from Failure Mode 1, despite using a pixel-native tool.
+Fix: route to PixelLab's Simple Creator with the BitForge canvas, which supports native 16×16 generation. Accept the tradeoff: fewer detail pixels means simpler silhouettes, but the grid is mathematically intact from generation through Unity import.
+
+**Failure Mode 3 — Wrong Unity import settings.** You discover PixelLab and generate a sprite that looks correct at its native resolution — discrete pixels, limited palette, clean silhouette. You import into Unity and it is blurry again, indistinguishable from the DALL-E output. This is not a generation failure. Unity's default Filter Mode: Bilinear reapplies interpolation at render time, every frame, on an otherwise correct source file. Fix: set Filter Mode: Point (no filter) and Compression: None in Unity's texture importer.
 
 ![Failure Mode 3 — correct sprite with wrong Unity import settings](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/images/03_failure_C_unity_settings.png?raw=true)
-
-Fix: route to PixelLab's Simple Creator with the BitForge canvas, which supports native 16×16 generation. Accept the tradeoff: fewer detail pixels means simpler silhouettes, but the grid is mathematically intact from generation through Unity import.
 
 These three failures share one surface appearance: a blurry sprite in the Unity scene view. But their root causes are distinct and their fixes are non-overlapping. Fixing only the import settings cannot address Failure Mode 1. Switching to PixelLab cannot address Failure Mode 2 unless you also change the import settings. Choosing the correct PixelLab sub-tool cannot address Failure Mode 3 if you then pass the asset through a bilinear resize step.
 
