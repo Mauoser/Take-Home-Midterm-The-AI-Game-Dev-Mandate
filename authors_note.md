@@ -28,13 +28,13 @@ The master claim — AI is a pipeline decision, not a magic layer — is demonst
 
 ### What Bookie generated and where I corrected it
 
-Bookie produced a strong initial draft with two structural problems and one factual error about PixelLab. First, the section order was wrong: Bookie placed "Choosing the Right Pipeline" (the Design Decision section) after "Three Failures That Look Like One" (the Failure Case section). The rubric order is Mechanism → Design Decision → Failure Case → Exercise. Second, Bookie's PixelLab description was generic and incorrect — it described the Character Creator as the wrong sub-tool for 16×16, and suggested the BitForge canvas in Simple Creator as the correct alternative. Testing PixelLab revealed this is wrong: 16×16 is below the reliable working resolution for most of PixelLab's AI models, and the correct pipeline requires generating at 32×32 and scaling down manually.
+Bookie produced a strong initial draft with two structural problems and one factual error. First, the section order was wrong: Bookie placed the Design Decision section after the Failure Case section. The rubric order is Mechanism → Design Decision → Failure Case → Exercise. Second, Bookie's PixelLab description was factually incorrect — it described the Character Creator as the wrong sub-tool for 16×16 and suggested the BitForge canvas in Simple Creator as the correct alternative. Testing PixelLab revealed this is wrong: no PixelLab tool reliably produces usable 16×16 output directly, and the Character Creator is in fact the correct tool — at the right generation size.
 
 My corrections:
 
 - Moved the Design Decision section before the Failure Case, restoring the rubric's causal logic: here is how it works → here is what you choose → here is what happens when you choose wrong.
-- Replaced Bookie's incorrect PixelLab recommendation entirely. Bookie wrote: "Use PixelLab's Simple Creator (BitForge canvas) which supports native 16×16 generation." My correction: the correct pipeline is Character Creator at 32×32 → scale to 16×16 with nearest-neighbor → manual cleanup in Aseprite. No PixelLab tool reliably produces usable 16×16 output directly.
-- Rewrote Failure Mode 3 entirely. Bookie's version framed it as choosing the wrong sub-tool (Character Creator vs. BitForge). The actual failure is skipping the manual cleanup step after a correct 32×32 → 16×16 downscale. The causal chain is: generate at 32×32 (correct) → scale nearest-neighbor to 16×16 (correct) → skip manual pixel editing (failure) → sprite reads as broken in game context.
+- Replaced Bookie's incorrect PixelLab recommendation. Bookie wrote: "Use PixelLab's Simple Creator (BitForge canvas) which supports native 16×16 generation." The correct pipeline is: Character Creator at 32×32 → scale to 16×16 with nearest-neighbor in Aseprite/Pixelorama/Photoshop → manual cleanup → import with Point filter.
+- Rewrote the three failure modes to reflect the correct logical order: (1) wrong model category — DALL-E generates in continuous space; (2) wrong generation size — Character Creator at 24×24 produces a non-integer 1.5:1 scale ratio to 16×16, making bilinear interpolation unavoidable; (3) wrong Unity import settings — Bilinear filter re-applies interpolation at render time on an otherwise correct source file.
 
 ### What Eddy flagged
 
@@ -82,15 +82,15 @@ Zone 4 (Pipeline Boundary Principle abstract diagram) and Zone 5 (Decision Frame
 
 **1. Can I state the master claim and explain how my essay instances it?**
 
-Yes. The master claim is: AI is a pipeline decision, not a magic layer. The essay instances it by demonstrating that three different pipeline failures — wrong model category, wrong import settings, skipped manual cleanup — each produce the same blurry output and each requires a different pipeline correction. Critically, the correct pipeline includes a mandatory human editing stage: no AI tool reliably produces usable 16×16 output directly, so the human cleanup step is not optional polish but a required pipeline decision.
+Yes. The master claim is: AI is a pipeline decision, not a magic layer. The essay instances it by demonstrating three pipeline failures — wrong model category, wrong generation size, wrong import settings — that each produce the same blurry output and each require a different pipeline correction. The correct pipeline also includes a mandatory human editing stage: no AI tool produces usable 16×16 output directly. The human cleanup step is a pipeline decision, not optional polish.
 
 **2. Does my essay name a failure mode, trace the causal chain, and show it triggering?**
 
-Yes, for all three failure modes. Failure Mode 3's causal chain is explicit: generate at 32×32 (correct) → scale to 16×16 nearest-neighbor (correct) → skip manual pixel editing (failure) → sprite reads as broken in game context. Failure Mode 1's causal chain is quantified in the notebook: 8 colors in, 142 colors out — a 17.8× color explosion from bilinear averaging of ~1,024 source pixels per output pixel.
+Yes, for all three failure modes. Failure Mode 2's causal chain is fully explicit: Character Creator at 24×24 (minimum canvas) → scale to 16×16 → bilinear resampling → 24/16 = 1.5 non-integer ratio → every output pixel is an interpolated blend → discrete grid destroyed → indistinguishable from Failure Mode 1. Failure Mode 1 is quantified in the notebook: 8 colors in, 142 out — a 17.8× explosion from bilinear averaging of ~1,024 source pixels per output pixel.
 
 **3. Is there a visible Human Decision Node — in the demo and on camera?**
 
-Yes. The Human Decision Node documents the choice of 32×32 over 24×24 as the generation target. The reasoning is architectural: 32→16 is a 2:1 integer ratio — every output pixel maps to exactly four source pixels, and nearest-neighbor makes clean, predictable choices. 24→16 is a 1.5:1 non-integer ratio — interpolation is unavoidable, introducing artifacts before the manual cleanup stage even begins. The notebook's Cell 5 produces a decision summary chart showing ACCEPT/REJECT by scale ratio. This is the 30-second camera moment in the video.
+Yes. The Human Decision Node documents the choice of 32×32 over 24×24 as the generation target. The Character Creator produces valid pixel art at 24×24, but 24→16 is a 1.5:1 non-integer ratio — any resampling algorithm must interpolate before manual cleanup even begins. 32→16 is exactly 2:1: clean nearest-neighbor, fewer artifacts, less correction needed. The notebook's Cell 5 produces an ACCEPT/REJECT chart by scale ratio. This is the 30-second camera moment in the video.
 
 **4. Does every section have the scenario, mechanism, decision, and failure?**
 
