@@ -80,7 +80,7 @@ The notebook demonstrates all three failure modes programmatically using PIL —
 Change this one line and re-run:
 
 ```python
-RESAMPLE_METHOD = Image.BILINEAR   # ← change to Image.NEAREST to fix
+RESAMPLE_METHOD = Image.NEAREST   # ← change to Image.BILINEAR, Image.BICUBIC, or Image.LANCZOS to break
 ```
 
 | Value | Result |
