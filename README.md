@@ -3,6 +3,7 @@
 
 **CSYE 7270: Virtual Environments and Real-Time 3D — Take-Home Midterm — Lei Zhang**  
 Category C — AI Tools Evaluation for Game Dev
+
 Video walkthrough: https://youtu.be/vGs0m1Aqde0
 
 ---
