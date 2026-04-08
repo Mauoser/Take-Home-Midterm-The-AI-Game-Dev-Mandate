@@ -98,6 +98,8 @@ Same source sprite. Same import settings. One variable determines whether the gr
 
 All three produce an identical blurry sprite in Unity's scene view.
 
+![Pipline/Workflow Diagram](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/pipline_workflow_diagram.png?raw=true)
+
 ```
 Failure A  →  DALL-E/Gemini  →  bilinear downscale  →  blurry
 Failure B  →  PixelLab Character Creator 24×24  →  bilinear scale to 16×16  →  blurry
