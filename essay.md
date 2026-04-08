@@ -52,7 +52,7 @@ A general-purpose diffusion model cannot produce this because it does not have a
 
 The real decision a developer faces is not "which prompt gets me better pixel art." It is "which pipeline produces correct output at 16×16."
 
-![Pipline/Workflow Diagram](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/pipline_workflow_diagrm.png?raw=true)
+![Pipline/Workflow Diagram](https://github.com/Mauoser/Take-Home-Midterm-The-AI-Game-Dev-Mandate/blob/main/pipline_workflow_diagram.png?raw=true)
 
 **Approach 1 — Pixel-native generation with manual cleanup.** Tools like PixelLab.ai generate pixel art natively, but 16×16 sits below the reliable working resolution for most of their AI models — the models struggle to produce coherent detail at that density. The correct pipeline for any 16×16 asset (characters, objects, tilesets, UI elements) is:
 
